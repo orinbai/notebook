@@ -1,0 +1,84 @@
+[I 17:53:28.391 NotebookApp] Serving notebooks from local directory: /home/orin/Learning/Notebook
+[I 17:53:28.391 NotebookApp] The Jupyter Notebook is running at:
+[I 17:53:28.391 NotebookApp] http://192.168.0.8:8301/
+[I 17:53:28.391 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[W 17:54:07.349 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 17:54:07.966 NotebookApp] Kernel started: 5ab01a77-9d6d-471a-ac07-c83428f95726
+[W 17:54:08.093 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20200902175328 (192.168.0.80) 10.24ms referer=http://192.168.0.8:8301/notebooks/Genetic%20Algorithms.ipynb
+[I 17:54:08.449 NotebookApp] Adapting to protocol v5.1 for kernel 5ab01a77-9d6d-471a-ac07-c83428f95726
+[I 17:58:27.902 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 17:58:27.903 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 17:59:19.808 NotebookApp] Kernel interrupted: 5ab01a77-9d6d-471a-ac07-c83428f95726
+[I 18:00:08.044 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:00:08.044 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:02:08.088 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:02:08.088 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:03:35.054 NotebookApp] Kernel interrupted: 5ab01a77-9d6d-471a-ac07-c83428f95726
+[I 18:04:08.263 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:04:08.264 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:05:14.676 NotebookApp] Kernel interrupted: 5ab01a77-9d6d-471a-ac07-c83428f95726
+[I 18:06:08.149 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:06:08.149 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:08:08.311 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:08:08.311 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:10:08.359 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:10:08.360 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:12:08.612 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:12:08.612 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:14:09.369 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:14:09.369 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:16:09.732 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:16:09.732 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:18:10.143 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:18:10.143 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:20:10.326 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:20:10.327 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:22:09.334 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:22:09.334 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:24:09.155 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:24:09.156 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:26:09.173 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:26:09.173 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:28:09.373 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:28:09.374 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:30:09.420 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:30:09.421 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:32:09.688 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:32:09.688 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:34:09.643 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:34:09.644 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:36:09.633 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:36:09.634 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:38:10.033 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:38:10.033 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:40:09.901 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:40:09.901 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:42:09.932 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:42:09.933 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:44:09.818 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:44:09.819 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:46:10.099 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:46:10.100 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:48:10.591 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:48:10.592 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:50:10.744 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:50:10.746 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:52:10.504 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:52:10.506 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:54:11.524 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:54:11.555 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:56:11.353 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:56:11.355 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 18:58:11.481 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 18:58:11.482 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 19:00:10.609 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 19:00:10.610 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 19:02:11.596 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 19:02:11.597 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 19:04:12.576 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 19:04:12.577 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 19:06:14.462 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 19:06:14.463 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 19:07:28.380 NotebookApp] Kernel interrupted: 5ab01a77-9d6d-471a-ac07-c83428f95726
+[I 19:08:17.635 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 19:08:17.636 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
