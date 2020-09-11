@@ -661,3 +661,21 @@
 [I 21:31:00.724 NotebookApp] Saving file at /Genetic Algorithms.ipynb
 [W 21:31:00.725 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
 [I 21:31:02.839 NotebookApp] Starting buffering for 5ab01a77-9d6d-471a-ac07-c83428f95726:27920610f9344fab8ad93c5d252e67b1
+[W 15:53:47.836 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 15:53:48.610 NotebookApp] Adapting to protocol v5.1 for kernel 5ab01a77-9d6d-471a-ac07-c83428f95726
+[W 15:53:48.697 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20200902175328 (192.168.0.80) 3.42ms referer=http://192.168.0.8:8301/notebooks/Genetic%20Algorithms.ipynb
+[I 15:55:49.045 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 15:55:49.047 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 15:57:49.168 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 15:57:49.169 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 15:59:49.296 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 15:59:49.298 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 16:01:48.966 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 16:01:48.967 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 16:03:27.406 NotebookApp] Kernel interrupted: 5ab01a77-9d6d-471a-ac07-c83428f95726
+[I 16:03:36.004 NotebookApp] Kernel interrupted: 5ab01a77-9d6d-471a-ac07-c83428f95726
+[I 16:03:36.184 NotebookApp] Kernel interrupted: 5ab01a77-9d6d-471a-ac07-c83428f95726
+[I 16:04:02.120 NotebookApp] Saving file at /Genetic Algorithms.ipynb
+[W 16:04:02.121 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
+[I 16:04:05.392 NotebookApp] Starting buffering for 5ab01a77-9d6d-471a-ac07-c83428f95726:954cfd173ba043a09807ec58b10e0535
+[IPKernelApp] WARNING | Parent appears to have exited, shutting down.
