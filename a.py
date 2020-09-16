@@ -307,8 +307,10 @@ class Tao:
 
 if __name__ == "__main__":
     n = Tao()
+
     def runsth(obj, n, idv, sMX):
         return obj.aLive(n, idv, sMX)
+
     print(n.individuals[0])
     cluster = dispy.JobCluster(runsth, depends=[Creature], nodes=["192.168.0.8"])
     jobs = []
@@ -316,21 +318,8 @@ if __name__ == "__main__":
         c = Creature()
         job = cluster.submit(c, no, individual, n.strategyMX)
         jobs.append(job)
-    
+
     for job in jobs:
         job()
         print(job.result, job.stdout)
     exit()
-
-    cluster = dispy.JobCluster(n.oneGen, depends=[Creature], nodes=["192.168.0.8"])
-    jobs = []
-    for no, individual in enumerate(n.individuals):
-        c = Creature()
-        job = cluster.submit(c)
-        jobs.append(job)
-
-    for job in jobs:
-        job()
-        print(job.result)
-
-    # n.fitness_func(Creature)
