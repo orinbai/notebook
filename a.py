@@ -111,12 +111,13 @@ class Creature:
 
     def aLive(self, no, choromsome, strategyMX):
         # print(no, choromsome, strategyMX)
-        tmpMAP = self.genMAP()
-        pos = self._initPos()
+        # tmpMAP = self.genMAP()
+        # pos = self._initPos()
         score = 0
         # 平均一下每个染色体的表现，所以需要self.loop次后取平均值
         for i in range(self.loop):
-            self.test = i
+            tmpMAP = self.genMAP()
+            pos = self._initPos()
             for m in range(self.maxSTEP):
                 situation = self.lookAround(pos, tmpMAP)
                 genePOS = strategyMX[situation]
