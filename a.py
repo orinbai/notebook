@@ -267,29 +267,7 @@ class Tao:
     def oneGen(self, obj, n, idv, sMX):
         return obj.aLive(n, idv, sMX)
 
-    def fitness_func(self, C):
-        cluster = dispy.JobCluster(self.oneGen, depends=[C], nodes=["192.168.0.8"])
-        for i in range(self.generation_max):
-            # wolf probability
-            #  w_p = 0
-            #  weakness = self.generation_max * 0.01
-            #  if i < weakness:
-            #      w_p = (weakness-i)/weakness
-            jobs = []
-            for no, individual in enumerate(self.individuals):
-                c = Creature()
-                # job = cluster.submit(c, no, individual, self.strategyMX)
-                job = cluster.submit(c)
-                job.id = c
-                jobs.append(job)
-
-            for job in jobs:
-                # idx, ft = job()
-                job()
-                print(job.result, job.stdout)
-                # self.fitness[idx] = ft
-            return 0
-
+    def fitness_func(self, i):
             w_p = 0
             weakness = self.generation_max * 0.01
             if i < weakness:
@@ -298,8 +276,6 @@ class Tao:
                 self.meetWolf()
             self.evaluate()
             self.getElitist(i)
-            # print(self.selector_probability)
-            # print(sum(self.fitness)/len(self.fitness))
             self.log.append([i, max(self.fitness), sum(self.fitness)/len(self.fitness), min(self.fitness)])
             self.evolve()
             print(i, ": ".join(map(str, self.log[-1])))
@@ -308,18 +284,19 @@ class Tao:
 if __name__ == "__main__":
     n = Tao()
 
-    def runsth(obj, n, idv, sMX):
+    def disUtil(obj, n, idv, sMX):
         return obj.aLive(n, idv, sMX)
 
-    print(n.individuals[0])
-    cluster = dispy.JobCluster(runsth, depends=[Creature], nodes=["192.168.0.8"])
-    jobs = []
-    for no, individual in enumerate(n.individuals):
-        c = Creature()
-        job = cluster.submit(c, no, individual, n.strategyMX)
-        jobs.append(job)
+    def disGeneration():
+        cluster = dispy.JobCluster(disUtil, depends=[Creature], nodes=["*"])
+        for i in range(n.generation_max):
+            jobs = []
+            for no, individual in enumerate(n.individuals):
+                c = Creature()
+                job = cluster.submit(c, no, individual, n.strategyMX)
+                jobs.append(job)
 
-    for job in jobs:
-        job()
-        print(job.result, job.stdout)
-    exit()
+            for job in jobs:
+                idx, score = job()
+                n.fitness[idx] = score
+            n.fitness_func(i)
