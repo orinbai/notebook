@@ -136,12 +136,18 @@ class Tao:
         self.sample_size = chrom_size
         self.strategyMX = {}
         self.age = 0
+        self.log = []
 
         # 进化需要的变量声明
         self.individuals = []
         self.fitness = []
         self.selector_probability = []
         self.new_individuals = []
+        self.elitists = {
+            "chromosome": [],
+            "fitness": -15 * 200,
+            "age": 0
+        }
 
         self.initVar()
 
@@ -177,15 +183,29 @@ class Tao:
             else:
                 return tmp
 
-    def evaluate(self):
+    def evaluate_bigNum(self):
         sp = self.selector_probability
         # worst_score = 15 * self.maxStep
         minFIT = abs(min(self.fitness))
         ft_sum = sum(self.fitness) + minFIT * self.size
-        print(ft_sum)
+        # print(ft_sum)
 
         for i in range(self.size):
             sp[i] = (self.fitness[i] + minFIT) / ft_sum
+
+        # old = 0
+        for i in range(self.size):
+            sp[i] += sp[i-1]
+
+    def evaluate(self):
+        sp = self.selector_probability
+        # worst_score = 15 * self.maxStep
+        minFIT = min(self.fitness)
+        ft_sum = sum(self.fitness) - minFIT*len(self.fitness)
+        # print(ft_sum)
+
+        for i in range(self.size):
+            sp[i] = (self.fitness[i] - minFIT) / ft_sum
 
         # old = 0
         for i in range(self.size):
@@ -210,7 +230,7 @@ class Tao:
 
     def cross(self, chromo1, chromo2):
         p = random.random()
-        cross_pos = random.randint(0, self.sample_space-1)
+        cross_pos = random.randint(0, self.sample_size-1)
         new_chromo1 = chromo1[:]
         new_chromo2 = chromo2[:]
         if chromo1 != chromo2 and p < self.crossover_probability:
@@ -224,12 +244,13 @@ class Tao:
         new_chromo = chromo[:]
         p = random.random()
         if p < self.mutation_probability:
-            mutate_idx = random.randint(0, self.sample_space-1)
+            mutate_idx = random.randint(0, self.sample_size-1)
             mutate_val = list(range(self.actions))[random.randint(0, self.actions-1)]
             new_chromo[mutate_idx] = mutate_val
         return new_chromo
 
     def getElitist(self, age):
+        # print(self.elitists["age"], "".join(map(str,self.elitists["chromosome"])))
         bestIndividual = [[idx, fit] for idx, fit in sorted(
             enumerate(self.fitness), key=lambda x: x[1], reverse=True
         )][0]
@@ -239,9 +260,13 @@ class Tao:
             self.elitists["chromosome"].extend(self.individuals[bestIndividual[0]])
             self.elitists["fitness"] = self.fitness[bestIndividual[0]]
 
-    def evolve(self):
+    def evolve(self, g):
         i = 1
         self.new_individuals[0] = self.elitists["chromosome"][:]
+        # i = 0
+        # while i < g - self.elitists["age"]:
+        #     self.new_individuals[i] = self.elitists["chromosome"][:]
+        #     i += 1
         while True:
             s_chromo1 = self.select()
             s_chromo2 = self.select()
@@ -258,6 +283,7 @@ class Tao:
                 break
         for i in range(self.size):
             self.individuals[i] = self.new_individuals[i][:]
+        # print("".join(map(str, self.individuals[0])))
 
     # def oneGen(self, obj):
     #     # m = obj.genMAP()
@@ -277,22 +303,22 @@ class Tao:
             self.evaluate()
             self.getElitist(i)
             self.log.append([i, max(self.fitness), sum(self.fitness)/len(self.fitness), min(self.fitness)])
-            self.evolve()
+            self.evolve(i)
             print(i, ": ".join(map(str, self.log[-1])))
 
 
 if __name__ == "__main__":
-    n = Tao()
+    n = Tao(gen_max=1500)
 
     def disUtil(obj, n, idv, sMX):
         return obj.aLive(n, idv, sMX)
 
-    def disGeneration():
-        cluster = dispy.JobCluster(disUtil, depends=[Creature], nodes=["*"])
+    def disGeneration(map_size=10, max_step=200, g_loop=200, chrom_size=243):
+        cluster = dispy.JobCluster(disUtil, depends=[Creature], nodes=["*"], secret='Z1207')
         for i in range(n.generation_max):
             jobs = []
             for no, individual in enumerate(n.individuals):
-                c = Creature()
+                c = Creature(map_size, max_step, g_loop, chrom_size)
                 job = cluster.submit(c, no, individual, n.strategyMX)
                 jobs.append(job)
 
@@ -300,3 +326,6 @@ if __name__ == "__main__":
                 idx, score = job()
                 n.fitness[idx] = score
             n.fitness_func(i)
+
+
+disGeneration(g_loop=400)
