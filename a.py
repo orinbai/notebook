@@ -113,17 +113,21 @@ class Creature:
         # print(no, choromsome, strategyMX)
         # tmpMAP = self.genMAP()
         # pos = self._initPos()
-        score = 0
+        # score = 0
+        score = []
         # 平均一下每个染色体的表现，所以需要self.loop次后取平均值
         for i in range(self.loop):
+            score[i] = 0
             tmpMAP = self.genMAP()
             pos = self._initPos()
             for m in range(self.maxSTEP):
                 situation = self.lookAround(pos, tmpMAP)
                 genePOS = strategyMX[situation]
                 nowSCORE, pos = self.score(self.act[choromsome[genePOS]], pos, tmpMAP)
-                score += nowSCORE
-        return no, score/self.loop
+                # score += nowSCORE
+                score[i] += nowSCORE
+        # return no, score/self.loop
+        return no, sorted(score)[int(self.loop*0.01), int(self.loop*0.99)]/int(self.loop*0.98)
 
 
 class Tao:
@@ -211,9 +215,9 @@ class Tao:
         for i in range(self.size):
             sp[i] += sp[i-1]
 
-    def meetWolf(self):
+    def destroy(self, s=0, e=10):
         minFit = min(self.fitness)
-        weakness = [n for n, val in sorted(enumerate(self.fitness), key=lambda x: x[1])][:10]
+        weakness = [n for n, val in sorted(enumerate(self.fitness), key=lambda x: x[1])][s:e]
         for i in weakness:
             if random.random() < 0.5:
                 self.fitness[i] = minFit
@@ -259,6 +263,10 @@ class Tao:
             self.elitists["age"] = age
             self.elitists["chromosome"].extend(self.individuals[bestIndividual[0]])
             self.elitists["fitness"] = self.fitness[bestIndividual[0]]
+        else:
+            # 如果10代不能产生新精英，则判断进入局部最优，摧毁%5的最优个体
+            if self.elitists["age"] - age > 20:
+                self.destroy(s=int(len(self.fitness)*0.05), e=len(self.fitness))
 
     def evolve(self, g):
         i = 1
@@ -285,11 +293,6 @@ class Tao:
             self.individuals[i] = self.new_individuals[i][:]
         # print("".join(map(str, self.individuals[0])))
 
-    # def oneGen(self, obj):
-    #     # m = obj.genMAP()
-    #     # print(obj.test)
-    #     obj.show()
-    #     return "ok"
     def oneGen(self, obj, n, idv, sMX):
         return obj.aLive(n, idv, sMX)
 
@@ -299,7 +302,7 @@ class Tao:
             if i < weakness:
                 w_p = (weakness - i)/weakness
             if random.random() < w_p:
-                self.meetWolf()
+                self.destroy()
             self.evaluate()
             self.getElitist(i)
             self.log.append([i, max(self.fitness), sum(self.fitness)/len(self.fitness), min(self.fitness)])
