@@ -364,6 +364,16 @@ class MultiTao(Tao):
             "fitness": [-15 * 200] * island,
             "age": [0] * island
         }
+        self.island = {}
+
+    def forBorn(self, island):
+        step = len(self.fitness)/self.island
+        if island < 2:
+            self.island[1] = [0: len(self.fitness)]
+        else:
+            for i in range(island):
+                self.island[i] = [i*step, (i+1)*step]
+
 
 
 
