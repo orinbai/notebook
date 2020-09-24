@@ -1,4 +1,4 @@
-import random, dispy
+import random, dispy, time, json
 
 
 class Creature:
@@ -117,7 +117,7 @@ class Creature:
         score = []
         # 平均一下每个染色体的表现，所以需要self.loop次后取平均值
         for i in range(self.loop):
-            score[i] = 0
+            score.append(0)
             tmpMAP = self.genMAP()
             pos = self._initPos()
             for m in range(self.maxSTEP):
@@ -127,7 +127,9 @@ class Creature:
                 # score += nowSCORE
                 score[i] += nowSCORE
         # return no, score/self.loop
-        return no, sorted(score)[int(self.loop*0.01), int(self.loop*0.99)]/int(self.loop*0.98)
+        avgScore = sum(sorted(score)[int(self.loop*0.05):int(self.loop*0.95)])/int(self.loop*0.90)
+        # avgScore = sum(score)/self.loop
+        return no, avgScore
 
 
 class Tao:
@@ -141,6 +143,12 @@ class Tao:
         self.strategyMX = {}
         self.age = 0
         self.log = []
+        self.old_mp = mp
+        self.happyGen = 100
+        self.stableGen = 30
+        # 先写入文件，后续考虑改成pipe定向
+        self.timeSTR = int(time.time())
+        self.logPIPE = open("/home/orin/Learning/Notebook/Genetic.log", 'a', buffering=1)
 
         # 进化需要的变量声明
         self.individuals = []
@@ -217,10 +225,13 @@ class Tao:
 
     def destroy(self, s=0, e=10):
         minFit = min(self.fitness)
+        m = 0
         weakness = [n for n, val in sorted(enumerate(self.fitness), key=lambda x: x[1])][s:e]
         for i in weakness:
             if random.random() < 0.5:
+                m += 1
                 self.fitness[i] = minFit
+        print("!!! Winter Comming: %d Best Individuals are Destroied !!" % m)
 
     def select(self):
         t = random.random()
@@ -254,7 +265,6 @@ class Tao:
         return new_chromo
 
     def getElitist(self, age):
-        # print(self.elitists["age"], "".join(map(str,self.elitists["chromosome"])))
         bestIndividual = [[idx, fit] for idx, fit in sorted(
             enumerate(self.fitness), key=lambda x: x[1], reverse=True
         )][0]
@@ -263,10 +273,25 @@ class Tao:
             self.elitists["age"] = age
             self.elitists["chromosome"].extend(self.individuals[bestIndividual[0]])
             self.elitists["fitness"] = self.fitness[bestIndividual[0]]
+            print("$$$ Better Individual Found: age %d, fit %.2f, mutation %.2f." % (age, self.elitists["fitness"], self.mutation_probability))
         else:
-            # 如果10代不能产生新精英，则判断进入局部最优，摧毁%5的最优个体
-            if self.elitists["age"] - age > 20:
-                self.destroy(s=int(len(self.fitness)*0.05), e=len(self.fitness))
+            # 如果达到设定的self.happyGen代不能产生新精英，则判断进入局部最优，摧毁%10的最优个体
+            if age - self.elitists["age"] > self.happyGen:
+                self.destroy(s=int(len(self.fitness) * 0.10), e=len(self.fitness))
+                self.elitists["age"] = age - 30
+            elif age - self.elitists["age"] > self.stableGen:
+                # 变异率会突然增加, 但由于变异率在正常情况下不会瞬间下降，所以
+                # 需要在后续慢慢下降到设定的值
+                if random.random() < (age-self.elitists["age"])/(self.happyGen-self.stableGen):
+                    self.mutation_probability += 0.05
+                    print("!!! Mutation Warning: %d gen no better individuals, up to %.2f" % (age-self.elitists["age"], self.mutation_probability))
+            else:
+                self.mutation_probability -= 0.1
+                if self.mutation_probability < self.old_mp:
+                    self.mutation_probability = self.old_mp
+
+        if self.mutation_probability > 1:
+            self.mutation_probability = 1
 
     def evolve(self, g):
         i = 1
@@ -297,21 +322,46 @@ class Tao:
         return obj.aLive(n, idv, sMX)
 
     def fitness_func(self, i):
-            w_p = 0
-            weakness = self.generation_max * 0.01
-            if i < weakness:
-                w_p = (weakness - i)/weakness
-            if random.random() < w_p:
-                self.destroy()
+            # w_p = 0
+            # weakness = self.generation_max * 0.01
+            # if i < weakness:
+            #     w_p = (weakness - i)/weakness
+            # if random.random() < w_p:
+            #     self.destroy()
             self.evaluate()
             self.getElitist(i)
-            self.log.append([i, max(self.fitness), sum(self.fitness)/len(self.fitness), min(self.fitness)])
+            self.log.append([
+                i,
+                max(self.fitness),
+                sum(self.fitness)/len(self.fitness),
+                min(self.fitness)
+            ])
+            self.pipeLOG([
+                i,
+                max(self.fitness),
+                sum(self.fitness)/len(self.fitness),
+                min(self.fitness)
+            ])
             self.evolve(i)
-            print(i, ": ".join(map(str, self.log[-1])))
+            # print(i, ": ".join(map(str, self.log[-1])))
+
+    def pipeLOG(self, deltaLog):
+        self.logPIPE.write("\t".join(map(str, deltaLog)))
+        self.logPIPE.write("\t%s" % self.timeSTR)
+        self.logPIPE.write("\n")
+
+    def saveEli(self):
+        path = "/home/orin/Learning/Notebook"
+        with open("%s/result/%d.res" % (path, int(time.time())), 'w') as f:
+            f.write("%s\t%s\n" % (self.timeSTR, json.dumps(self.elitists)))
+
+
+class MultiTao(Tao):
+
 
 
 if __name__ == "__main__":
-    n = Tao(gen_max=1500)
+    n = Tao(gen_max=1800)
 
     def disUtil(obj, n, idv, sMX):
         return obj.aLive(n, idv, sMX)
@@ -332,3 +382,5 @@ if __name__ == "__main__":
 
 
 disGeneration(g_loop=400)
+n.logPIPE.close()
+n.saveEli()
