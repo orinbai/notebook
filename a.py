@@ -278,7 +278,7 @@ class Tao:
             # 如果达到设定的self.happyGen代不能产生新精英，则判断进入局部最优，摧毁%10的最优个体
             if age - self.elitists["age"] > self.happyGen:
                 self.destroy(s=int(len(self.fitness) * 0.10), e=len(self.fitness))
-                self.elitists["age"] = age - 30
+                self.elitists["age"] = age - 70
             elif age - self.elitists["age"] > self.stableGen:
                 # 变异率会突然增加, 但由于变异率在正常情况下不会瞬间下降，所以
                 # 需要在后续慢慢下降到设定的值
@@ -357,6 +357,13 @@ class Tao:
 
 
 class MultiTao(Tao):
+    def __init__(self, size=200, chrom_size=243, cp=0.9, mp=0.4, gen_max=1000, island=4):
+        super(Tao, self).__init__(size=200, chrom_size=243, cp=0.9, mp=0.4, gen_max=1000)
+        self.elitists = {
+            "chromosome": [[]] * island,
+            "fitness": [-15 * 200] * island,
+            "age": [0] * island
+        }
 
 
 
