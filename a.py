@@ -377,7 +377,7 @@ class Tao_Multi:
         self.stableGen = 30
         # 先写入文件，后续考虑改成pipe定向
         self.timeSTR = int(time.time())
-        self.logPIPE = open("/home/orin/Learning/Notebook/Genetic.log", 'a', buffering=1)
+        self.logPIPE = open("/home/orin/Learning/Notebook/Genetic.mi.log", 'a', buffering=1)
 
         # 进化需要的变量声明
         self.individuals = []
@@ -387,10 +387,11 @@ class Tao_Multi:
         # island=0，意味着经典遗传算法
         self.island = {}
         self.elitists = {
-            "chromosome": [],
-            "fitness": -15 * 200,
-            "age": 0
+            "chromosome": [[]] * island,
+            "fitness": [-15 * 200]*4,
+            "age": [0] * 4
         }
+        self.trans = [0] * island
 
         self.initVar()
         self.forBorn(island)
@@ -464,6 +465,7 @@ class Tao_Multi:
 
         for i in range(ethnic_s, ethnic_e):
             self.selector_probability[i] = (self.fitness[i] - minFIT) / ft_sum
+        # print(self.selector_probability[ethnic_s: ethnic_e])
 
         # old = 0
         for i in range(ethnic_s, ethnic_e):
@@ -471,6 +473,7 @@ class Tao_Multi:
                 continue
             else:
                 self.selector_probability[i] += self.selector_probability[i-1]
+        # print(island, self.selector_probability[ethnic_s: ethnic_e])
 
     def destroy(self, s=0, e=10, island=0):
         ethnic_s, ethnic_e = self.island[island]
@@ -485,7 +488,7 @@ class Tao_Multi:
                 self.fitness[i] = minFit
         print("!!! Winter Comming: %d Best Individuals are Destroied !!" % m)
 
-    def select(self, island=0):
+    def select(self, island):
         ethnic_s, ethnic_e = self.island[island]
         t = random.random()
         for n, p in list(enumerate(self.selector_probability))[ethnic_s:ethnic_e]:
@@ -501,14 +504,23 @@ class Tao_Multi:
         cross_pos = random.randint(0, self.sample_size-1)
         new_chromo1 = chromo1[:]
         new_chromo2 = chromo2[:]
+        # print(cross_pos)
         if chromo1 != chromo2 and p < self.crossover_probability:
             # 按照书上的交叉，是随机的点进行交换
             new_chromo1, new_chromo2 = chromo1[: cross_pos], chromo2[: cross_pos]
             new_chromo1.extend(chromo2[cross_pos:])
             new_chromo2.extend(chromo1[cross_pos:])
+        # print("="*10)
+        # print("".join(map(str, chromo1)))
+        # print("".join(map(str, new_chromo1)))
+        # print("-"*10)
+        # print("".join(map(str, chromo2)))
+        # print("".join(map(str, new_chromo2)))
+        # print("="*10)
+        # print()
         return new_chromo1, new_chromo2
 
-    def mutate(self, chromo, island=0):
+    def mutate(self, chromo, island):
         new_chromo = chromo[:]
         p = random.random()
         if p < self.mutation_probability[island]:
@@ -517,20 +529,22 @@ class Tao_Multi:
             new_chromo[mutate_idx] = mutate_val
         return new_chromo
 
-    def getElitist(self, age, island=0):
+    def getElitist(self, age, island):
         ethnic_s, ethnic_e = self.island[island]
         ethnicScale = len(self.fitness[ethnic_s: ethnic_e])
         bestIndividual = [[idx, fit] for idx, fit in sorted(
             list(enumerate(self.fitness))[ethnic_s: ethnic_e], key=lambda x: x[1], reverse=True
         )][0]
+        # print([n for n, v in sorted(enumerate(self.elitists["chromosome"]), key=lambda x: x[1], reverse=True) if n != island][0])
+        # print(bestIndividual, self.elitists["fitness"])
         if self.elitists["fitness"][island] < self.fitness[bestIndividual[0]]:
             self.elitists["chromosome"][island] = []
             self.elitists["age"][island] = age
             self.elitists["chromosome"][island].extend(self.individuals[bestIndividual[0]])
             self.elitists["fitness"][island] = self.fitness[bestIndividual[0]]
             print(
-                "$$$ Better Individual Found: age %d, fit %.2f, mutation %.2f." % (
-                    age, self.elitists["fitness"], self.mutation_probability
+                "$$$ Island %d Better Individual Found: age %d, fit %.2f, mutation %.2f." % (
+                    island, age, self.elitists["fitness"][island], self.mutation_probability[island]
                     )
                     )
         else:
@@ -541,12 +555,13 @@ class Tao_Multi:
             elif age - self.elitists["age"][island] > self.stableGen:
                 # 变异率会突然增加, 但由于变异率在正常情况下不会瞬间下降，所以
                 # 需要在后续慢慢下降到设定的值
+                self.trans[island] = [n for n, v in sorted(enumerate(self.elitists["chromosome"]), key=lambda x: x[1], reverse=True) if n != island][0]
                 if random.random() < (age-self.elitists["age"][island])/(self.happyGen-self.stableGen):
                     self.mutation_probability[island] += 0.05
                     print(
-                        "!!! Mutation Warning: %d gen no better individuals, up to %.2f" %
+                        "!!! Island %d Mutation Warning: %d gen no better individuals, up to %.2f" %
                         (
-                            age-self.elitists["age"], self.mutation_probability
+                            island, age-self.elitists["age"][island], self.mutation_probability[island]
                         ))
             else:
                 self.mutation_probability[island] -= 0.1
@@ -556,10 +571,32 @@ class Tao_Multi:
         if self.mutation_probability[island] > 1:
             self.mutation_probability[island] = 1
 
-    def evolve(self, island):
+    def islandTrans(self, age, island):
+        # 按照1->2->3->4->1，所以定一个island长度的列表
+        # 0 为不传递，1为传递
+        if self.trans[island]:
+            return self.elitists["chromosome"][self.trans[island]]
+        else:
+            if age % len(self.island) == island and (
+                self.elitists["chromosome"][island] < self.elitists["chromosome"][island-1]
+            ):
+                return self.elitists["chromosome"][island-1]
+            else:
+                return False
+
+    def evolve(self, age, island):
         ethnic_s, ethnic_e = self.island[island]
-        i = ethnic_s + 1
-        self.new_individuals[ethnic_s] = self.elitists["chromosome"][island][:]
+        i = ethnic_s
+        self.new_individuals[i] = self.elitists["chromosome"][island][:]
+        i += 1
+        trans = self.islandTrans(age, island)
+        # if trans and random.random < 0.5:
+        if trans:
+            print("!!! Trans: %d" % island)
+            self.new_individuals[i] = trans[:]
+            if self.trans[island]:
+                self.trans[island] = 0
+            i += 1
         # i = 0
         # while i < g - self.elitists["age"]:
         #     self.new_individuals[i] = self.elitists["chromosome"][:]
@@ -569,7 +606,8 @@ class Tao_Multi:
             s_chromo2 = self.select(island)
             (n_chromo1, n_chromo2) = self.cross(
                 self.individuals[s_chromo1],
-                self.individuals[s_chromo2])
+                self.individuals[s_chromo2]
+                )
             if random.randint(0, 1) == 0:
                 self.new_individuals[i] = self.mutate(n_chromo1, island)
             else:
@@ -602,14 +640,17 @@ class Tao_Multi:
                 #     sum(self.fitness)/len(self.fitness),
                 #     min(self.fitness)
                 # ])
-                self.pipeLOG([
-                    i,
-                    max(self.fitness),
-                    sum(self.fitness)/len(self.fitness),
-                    min(self.fitness)
-                ])
-                self.evolve(i)
-            # print(i, ": ".join(map(str, self.log[-1])))
+                self.evolve(i, n)
+                # break
+            self.pipeLOG([
+                i,
+                # max(self.fitness),
+                self.statSimple(max),
+                # sum(self.fitness)/len(self.fitness),
+                self.statSimple(np.mean),
+                # min(self.fitness)
+                self.statSimple(min)
+            ])
 
     def pipeLOG(self, deltaLog):
         self.logPIPE.write("\t".join(map(str, deltaLog)))
@@ -618,16 +659,17 @@ class Tao_Multi:
 
     def saveEli(self):
         path = "/home/orin/Learning/Notebook"
-        with open("%s/result/%d.res" % (path, int(time.time())), 'w') as f:
+        with open("%s/result/%d.mi.res" % (path, int(time.time())), 'w') as f:
             f.write("%s\t%s\n" % (self.timeSTR, json.dumps(self.elitists)))
 
     def statSimple(self, fName):
         res = []
+        res.append("%.2f" % fName(self.fitness))
         for i in sorted(self.island):
             ethnic_s, ethnic_e = self.island[i]
             r1 = fName(self.fitness[ethnic_s: ethnic_e])
-            res.append("isLand %d: %.2f" % (i, r1))
-        res.append("Global: %.2f" % fName(self.fitness))
+            res.append("%.2f" % r1)
+        # res.append("Global: %.2f" % fName(self.fitness))
         return res
 
 
@@ -662,7 +704,35 @@ if __name__ == "__main__":
 # n.logPIPE.close()
 # n.saveEli()
 
-m = Tao_Multi()
-print(m.elitists)
-m.forBorn(1)
-print(m.island)
+m = Tao_Multi(gen_max=1800)
+
+
+def disUtil_Multi(obj, n, idv, sMX):
+        return obj.aLive(n, idv, sMX)
+
+
+def disGeneration_Multi(map_size=10, max_step=200, g_loop=200, chrom_size=243, island=4):
+        cluster = dispy.JobCluster(
+            disUtil_Multi,
+            depends=[Creature],
+            nodes=["*"],
+            secret='Z1207'
+            )
+        for i in range(m.generation_max):
+            jobs = []
+            for no, individual in enumerate(m.individuals):
+                c = Creature(map_size, max_step, g_loop, chrom_size)
+                job = cluster.submit(c, no, individual, m.strategyMX)
+                jobs.append(job)
+
+            for job in jobs:
+                idx, score = job()
+                m.fitness[idx] = score
+            m.fitness_func(i)
+            if max(m.fitness) > 310:
+                break
+
+
+disGeneration_Multi(g_loop=400)
+m.logPIPE.close()
+m.saveEli()
