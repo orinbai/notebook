@@ -358,9 +358,10 @@ class Tao_Uni:
 
 
 class Tao_Multi:
-    def __init__(self, size=200, chrom_size=243, cp=0.9, mp=0.4, gen_max=1000, island=4):
+    def __init__(self, size=200, chrom_size=243, cp=0.9, mp=0.4, tp=0.1, gen_max=1000, island=4):
         self.size = size  # 群体中的个体个数
         self.crossover_probability = cp  # 个体间染色体交叉概率
+        self.stable_p = [mp, tp]
         # 因为算法中变异率是动态变化的，所以需要给每个island设定变异率
         if island > 0:
             self.mutation_probability = [mp] * island  # 个体变异概率
@@ -372,7 +373,7 @@ class Tao_Multi:
         self.strategyMX = {}
         self.age = 0
         self.log = []
-        self.old_mp = mp
+        # self.old_mp = mp
         self.happyGen = 100
         self.stableGen = 30
         # 先写入文件，后续考虑改成pipe定向
@@ -392,6 +393,7 @@ class Tao_Multi:
             "age": [0] * 4
         }
         self.trans = [0] * island
+        self.tp = [0.2] * island
 
         self.initVar()
         self.forBorn(island)
@@ -555,18 +557,19 @@ class Tao_Multi:
             elif age - self.elitists["age"][island] > self.stableGen:
                 # 变异率会突然增加, 但由于变异率在正常情况下不会瞬间下降，所以
                 # 需要在后续慢慢下降到设定的值
-                self.trans[island] = [n for n, v in sorted(enumerate(self.elitists["chromosome"]), key=lambda x: x[1], reverse=True) if n != island][0]
+                # self.trans[island] = [n for n, v in sorted(enumerate(self.elitists["chromosome"]), key=lambda x: x[1], reverse=True) if n != island][0]
                 if random.random() < (age-self.elitists["age"][island])/(self.happyGen-self.stableGen):
                     self.mutation_probability[island] += 0.05
+                    self.tp[island] += 0.05
                     print(
-                        "!!! Island %d Mutation Warning: %d gen no better individuals, up to %.2f" %
+                        "!!! Island %d Mutation Warning: %d gen no better individuals, up to %.2f, trans %.2f" %
                         (
-                            island, age-self.elitists["age"][island], self.mutation_probability[island]
+                            island, age-self.elitists["age"][island], self.mutation_probability[island], self.tp[island]
                         ))
             else:
                 self.mutation_probability[island] -= 0.1
-                if self.mutation_probability[island] < self.old_mp:
-                    self.mutation_probability[island] = self.old_mp
+                if self.mutation_probability[island] < self.stable_p[0]:
+                    self.mutation_probability[island] = self.stable_p[0]
 
         if self.mutation_probability[island] > 1:
             self.mutation_probability[island] = 1
@@ -577,10 +580,19 @@ class Tao_Multi:
         if self.trans[island]:
             return self.elitists["chromosome"][self.trans[island]]
         else:
-            if age % len(self.island) == island and (
-                self.elitists["chromosome"][island] < self.elitists["chromosome"][island-1]
-            ):
-                return self.elitists["chromosome"][island-1]
+            # if age % len(self.island) == island and (
+            #     self.elitists["chromosome"][island] < self.elitists["chromosome"][island-1]
+            # ):
+            if age % len(self.island) == island:
+                if self.elitists["chromosome"][island] < self.elitists["chromosome"][island-1]:
+                    self.tp[island] -= 0.1
+                    return self.elitists["chromosome"][island-1]
+                else:
+                    if random.random() < 0.3:
+                        self.tp[island] -= 0.1
+                        return self.elitists["chromosome"][island-1]
+                    else:
+                        return False
             else:
                 return False
 
@@ -591,12 +603,15 @@ class Tao_Multi:
         i += 1
         trans = self.islandTrans(age, island)
         # if trans and random.random < 0.5:
-        if trans:
+        if trans and random.random() < self.tp[island]:
+            # self.tp[island] -= 0.1
             print("!!! Trans: %d" % island)
             self.new_individuals[i] = trans[:]
             if self.trans[island]:
                 self.trans[island] = 0
             i += 1
+        if self.tp[island] < self.stable_p[1]: self.tp[island] = self.stable_p[1]
+        if self.tp[island] > 1: self.tp[island] = 1
         # i = 0
         # while i < g - self.elitists["age"]:
         #     self.new_individuals[i] = self.elitists["chromosome"][:]
@@ -634,21 +649,11 @@ class Tao_Multi:
                 ethnic_s, ethnic_e = self.island[n]
                 self.evaluate(n)
                 self.getElitist(i, n)
-                # self.log.append([
-                #     i,
-                #     max(self.fitness),
-                #     sum(self.fitness)/len(self.fitness),
-                #     min(self.fitness)
-                # ])
                 self.evolve(i, n)
-                # break
             self.pipeLOG([
                 i,
-                # max(self.fitness),
                 self.statSimple(max),
-                # sum(self.fitness)/len(self.fitness),
                 self.statSimple(np.mean),
-                # min(self.fitness)
                 self.statSimple(min)
             ])
 
@@ -704,7 +709,7 @@ if __name__ == "__main__":
 # n.logPIPE.close()
 # n.saveEli()
 
-m = Tao_Multi(gen_max=1800)
+m = Tao_Multi(gen_max=1200)
 
 
 def disUtil_Multi(obj, n, idv, sMX):
