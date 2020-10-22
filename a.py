@@ -358,13 +358,14 @@ class Tao_Uni:
 
 
 class Tao_Multi:
-    def __init__(self, size=200, chrom_size=243, cp=0.9, mp=0.4, tp=0.1, gen_max=1000, island=4):
+    def __init__(self, size=200, chrom_size=243, cp=0.9, mp=0.4, tp=0.1, gen_max=1000, island=4, diff=False):
         self.size = size  # 群体中的个体个数
         self.crossover_probability = cp  # 个体间染色体交叉概率
-        self.stable_p = [mp, tp]
+        initMP = self.randomMP(island, mp)
+        self.stable_p = {"mp": initMP[:], "tp": tp}
         # 因为算法中变异率是动态变化的，所以需要给每个island设定变异率
         if island > 0:
-            self.mutation_probability = [mp] * island  # 个体变异概率
+            self.mutation_probability = initMP[:]  # 个体变异概率
         else:
             self.mutation_probability = mp
         self.generation_max = gen_max
@@ -393,7 +394,16 @@ class Tao_Multi:
             "age": [0] * 4
         }
         self.trans = [0] * island
-        self.tp = [0.2] * island
+        self.tp = [0.1] * island
+        self.varCross = [False] * island
+        self.diff = {
+            True: self.uniformCross,
+            False: self.cross
+        }
+        if diff:
+            # 默认选择一半岛用更多样的交叉规则
+            self.varCross[0] = True
+            self.varCross[2] = True
 
         self.initVar()
         self.forBorn(island)
@@ -411,6 +421,15 @@ class Tao_Multi:
             self.fitness.append(0)
             self.selector_probability.append(0)
             self.new_individuals.append([])
+
+    def randomMP(self, island, mp):
+        tmp = []
+        halfIdv = int(island/2)
+        # 最小变异率10%，实际上mp是最大的变异可能
+        tmp.extend([random.uniform(0.1, mp/2) for i in range(halfIdv)])
+        tmp.extend([random.uniform(mp/2, mp) for i in range(island-halfIdv)])
+        random.shuffle(tmp)
+        return tmp
 
     def forBorn(self, island):
         # 直接按照岛屿数量将所有个体顺序切分，除不尽的直接在最后一个岛屿补齐
@@ -488,7 +507,8 @@ class Tao_Multi:
             if random.random() < 0.5:
                 m += 1
                 self.fitness[i] = minFit
-        print("!!! Winter Comming: %d Best Individuals are Destroied !!" % m)
+        print("!!! Winter Comming to Island %d: %d Best Individuals are Destroied !! Mutation ReLoaded." % (island, m))
+        self.mutation_probability[island] = self.stable_p["mp"][island]
 
     def select(self, island):
         ethnic_s, ethnic_e = self.island[island]
@@ -522,6 +542,17 @@ class Tao_Multi:
         # print()
         return new_chromo1, new_chromo2
 
+    def uniformCross(self, chromo1, chromo2):
+        p = random.random()
+        new_chromo1 = chromo1[:]
+        new_chromo2 = chromo2[:]
+        if p < self.crossover_probability:
+            for i in range(len(chromo1)):
+                p_c = random.random()
+                if p_c < 0.5:
+                    new_chromo1[i], new_chromo2[i] = new_chromo2[i], new_chromo1[i]
+        return new_chromo1, new_chromo2
+
     def mutate(self, chromo, island):
         new_chromo = chromo[:]
         p = random.random()
@@ -544,6 +575,7 @@ class Tao_Multi:
             self.elitists["age"][island] = age
             self.elitists["chromosome"][island].extend(self.individuals[bestIndividual[0]])
             self.elitists["fitness"][island] = self.fitness[bestIndividual[0]]
+            self.tp[island] = self.stable_p["tp"]
             print(
                 "$$$ Island %d Better Individual Found: age %d, fit %.2f, mutation %.2f." % (
                     island, age, self.elitists["fitness"][island], self.mutation_probability[island]
@@ -554,12 +586,18 @@ class Tao_Multi:
             if age - self.elitists["age"][island] > self.happyGen:
                 self.destroy(s=int(ethnicScale * 0.10), e=ethnicScale)
                 self.elitists["age"][island] = age - (self.happyGen - self.stableGen)
+                self.trans[island] = [n for n, v in sorted(enumerate(self.elitists["fitness"]), key=lambda x: x[1]) if n != island][0]
             elif age - self.elitists["age"][island] > self.stableGen:
                 # 变异率会突然增加, 但由于变异率在正常情况下不会瞬间下降，所以
                 # 需要在后续慢慢下降到设定的值
                 # self.trans[island] = [n for n, v in sorted(enumerate(self.elitists["chromosome"]), key=lambda x: x[1], reverse=True) if n != island][0]
                 if random.random() < (age-self.elitists["age"][island])/(self.happyGen-self.stableGen):
                     self.mutation_probability[island] += 0.05
+                    # if random.random() < self.mutation_probability[island]:
+                        # print(
+                        #     "*** Island %d new Cross Algorithms Launch ***" % island
+                        # )
+                        # self.varCross[island] = True
                     self.tp[island] += 0.05
                     print(
                         "!!! Island %d Mutation Warning: %d gen no better individuals, up to %.2f, trans %.2f" %
@@ -568,8 +606,8 @@ class Tao_Multi:
                         ))
             else:
                 self.mutation_probability[island] -= 0.1
-                if self.mutation_probability[island] < self.stable_p[0]:
-                    self.mutation_probability[island] = self.stable_p[0]
+                if self.mutation_probability[island] < self.stable_p["mp"][island]:
+                    self.mutation_probability[island] = self.stable_p["mp"][island]
 
         if self.mutation_probability[island] > 1:
             self.mutation_probability[island] = 1
@@ -577,24 +615,30 @@ class Tao_Multi:
     def islandTrans(self, age, island):
         # 按照1->2->3->4->1，所以定一个island长度的列表
         # 0 为不传递，1为传递
+        acc_p = self.simAnneal(age-self.elitists["age"][island])
         if self.trans[island]:
             return self.elitists["chromosome"][self.trans[island]]
         else:
             # if age % len(self.island) == island and (
             #     self.elitists["chromosome"][island] < self.elitists["chromosome"][island-1]
             # ):
-            if age % len(self.island) == island:
-                if self.elitists["chromosome"][island] < self.elitists["chromosome"][island-1]:
-                    self.tp[island] -= 0.1
+            # 因为交换概率已经很低，所以去掉当前轮的限制
+            # if age % len(self.island) == island:
+            if self.elitists["chromosome"][island] < self.elitists["chromosome"][island-1]:
+                # self.tp[island] -= 0.1
+                if random.random() < (1-acc_p):
                     return self.elitists["chromosome"][island-1]
-                else:
-                    if random.random() < 0.3:
-                        self.tp[island] -= 0.1
-                        return self.elitists["chromosome"][island-1]
-                    else:
-                        return False
             else:
-                return False
+                if random.random() < acc_p:
+                    # self.tp[island] -= 0.1
+                    return self.elitists["chromosome"][island-1]
+                # else:
+                #     return False
+            # else:
+        return False
+
+    def simAnneal(self, age):
+        return 0.5*(0.8**int(age/100))
 
     def evolve(self, age, island):
         ethnic_s, ethnic_e = self.island[island]
@@ -610,8 +654,8 @@ class Tao_Multi:
             if self.trans[island]:
                 self.trans[island] = 0
             i += 1
-        if self.tp[island] < self.stable_p[1]: self.tp[island] = self.stable_p[1]
-        if self.tp[island] > 1: self.tp[island] = 1
+        if self.tp[island] < self.stable_p["tp"]: self.tp[island] = self.stable_p["tp"]
+        if self.tp[island] > 1 : self.tp[island] = 1
         # i = 0
         # while i < g - self.elitists["age"]:
         #     self.new_individuals[i] = self.elitists["chromosome"][:]
@@ -619,10 +663,20 @@ class Tao_Multi:
         while True:
             s_chromo1 = self.select(island)
             s_chromo2 = self.select(island)
-            (n_chromo1, n_chromo2) = self.cross(
+            # if self.varCross[island]:
+            #     (n_chromo1, n_chromo2) = self.uniformCross(
+            #         self.individuals[s_chromo1],
+            #         self.individuals[s_chromo2]
+            #     )
+            # else:
+            #     (n_chromo1, n_chromo2) = self.cross(
+            #         self.individuals[s_chromo1],
+            #         self.individuals[s_chromo2]
+            #     )
+            (n_chromo1, n_chromo2) = self.diff[self.varCross[island]](
                 self.individuals[s_chromo1],
                 self.individuals[s_chromo2]
-                )
+            )
             if random.randint(0, 1) == 0:
                 self.new_individuals[i] = self.mutate(n_chromo1, island)
             else:
@@ -630,6 +684,7 @@ class Tao_Multi:
 
             i += 1
             if i >= ethnic_e:
+                # self.varCross[island] = False
                 break
         for i in range(ethnic_s, ethnic_e):
             self.individuals[i] = self.new_individuals[i][:]
@@ -645,6 +700,7 @@ class Tao_Multi:
             #     w_p = (weakness - i)/weakness
             # if random.random() < w_p:
             #     self.destroy()
+            print("%s %d %s" % ("="*15, i, "="*15))
             for n in self.island:
                 ethnic_s, ethnic_e = self.island[n]
                 self.evaluate(n)
@@ -682,9 +738,10 @@ if __name__ == "__main__":
     n = Tao_Uni(gen_max=1800)
 
     def disUtil(obj, n, idv, sMX):
+        print(n, idv, sMX)
         return obj.aLive(n, idv, sMX)
 
-    def disGeneration(map_size=10, max_step=200, g_loop=200, chrom_size=243):
+    def disGeneration(map_size=12, max_step=200, g_loop=200, chrom_size=243):
         cluster = dispy.JobCluster(
             disUtil,
             depends=[Creature],
@@ -709,7 +766,7 @@ if __name__ == "__main__":
 # n.logPIPE.close()
 # n.saveEli()
 
-m = Tao_Multi(gen_max=1200)
+m = Tao_Multi(gen_max=3000, diff=True)
 
 
 def disUtil_Multi(obj, n, idv, sMX):
@@ -734,10 +791,10 @@ def disGeneration_Multi(map_size=10, max_step=200, g_loop=200, chrom_size=243, i
                 idx, score = job()
                 m.fitness[idx] = score
             m.fitness_func(i)
-            if max(m.fitness) > 310:
-                break
+            # if max(m.fitness) > 310:
+            #     break
 
 
-disGeneration_Multi(g_loop=400)
+disGeneration_Multi(g_loop=800)
 m.logPIPE.close()
 m.saveEli()
