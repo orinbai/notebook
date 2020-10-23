@@ -695,7 +695,7 @@ def disUtil_Multi(obj, n, idv, sMX):
         return obj.aLive(n, idv, sMX)
 
 
-def disGeneration_Multi(map_size=10, max_step=200, g_loop=200, chrom_size=243, island=4):
+def disGeneration_Multi(map_size=12, max_step=200, g_loop=200, chrom_size=243, island=4):
         cluster = dispy.JobCluster(
             disUtil_Multi,
             depends=[Creature],
@@ -713,7 +713,7 @@ def disGeneration_Multi(map_size=10, max_step=200, g_loop=200, chrom_size=243, i
                 idx, score = job()
                 m.fitness[idx] = score
             m.fitness_func(i)
-            if max(m.fitness) > map_size*map_size/2-10:
+            if max(m.fitness) > (map_size-2)*(map_size-2)/2-10:
                 break
 
 
