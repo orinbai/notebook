@@ -7,7 +7,6 @@ class Creature:
     ''' 只做每一个染色体进化过程，不涉及交叉、变异等 '''
     def __init__(self, map_size=10, max_step=200, g_loop=200, chrom_size=243):
         self.mapDIM = map_size
-        # self.idvNUM = size
         self.maxSTEP = max_step
         self.loop = g_loop
 
@@ -73,11 +72,6 @@ class Creature:
     def _initPos(self):
         import random
         return random.randint(1, self.mapDIM-2), random.randint(1, self.mapDIM-2)
-
-    # def lookAround(self, pos, nowMap):
-    #     # 只能看到上下左右中, pos是(x, y), 但要注意其实 x是纵轴，y是横轴
-    #     x, y = pos
-    #     return nowMap[x-1][y], nowMap[x+1][y], nowMap[x][y-1], nowMap[x][y+1], nowMap[x][y]
 
     def score(self, act, pos, nowMap):
         import random
@@ -554,7 +548,8 @@ class Tao_Multi:
                 # 变异率会突然增加, 但由于变异率在正常情况下不会瞬间下降，所以
                 # 需要在后续慢慢下降到设定的值
                 if random.random() < (age-self.elitists["age"][island])/(self.happyGen-self.stableGen):
-                    self.mutation_probability[island] += 0.05
+                    # 步数有问题时，很难稳定，所以暂停变异率增加
+                    # self.mutation_probability[island] += 0.05
                     self.tp[island] += 0.05
                     print(
                         "!!! Island %d Mutation Warning: %d gen no better individuals, up to %.2f, trans %.2f" %
@@ -562,7 +557,7 @@ class Tao_Multi:
                             island, age-self.elitists["age"][island], self.mutation_probability[island], self.tp[island]
                         ))
             else:
-                self.mutation_probability[island] -= 0.1
+                # self.mutation_probability[island] -= 0.1
                 if self.mutation_probability[island] < self.stable_p["mp"][island]:
                     self.mutation_probability[island] = self.stable_p["mp"][island]
 
@@ -688,7 +683,7 @@ if __name__ == "__main__":
 # n.logPIPE.close()
 # n.saveEli()
 
-m = Tao_Multi(gen_max=3000, diff=True)
+m = Tao_Multi(gen_max=1500, diff=True)
 
 
 def disUtil_Multi(obj, n, idv, sMX):
@@ -713,10 +708,10 @@ def disGeneration_Multi(map_size=12, max_step=200, g_loop=200, chrom_size=243, i
                 idx, score = job()
                 m.fitness[idx] = score
             m.fitness_func(i)
-            if max(m.fitness) > (map_size-2)*(map_size-2)/2-10:
+            if max(m.fitness) > (map_size-2)*(map_size-2)*10/2-10:
                 break
 
 
-disGeneration_Multi(g_loop=800)
+disGeneration_Multi(g_loop=500)
 m.logPIPE.close()
 m.saveEli()
