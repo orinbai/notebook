@@ -1,30 +1,24 @@
-[I 17:24:33.752 NotebookApp] Serving notebooks from local directory: /home/orin/Learning/Notebook
-[I 17:24:33.752 NotebookApp] The Jupyter Notebook is running at:
-[I 17:24:33.752 NotebookApp] http://192.168.0.8:8301/
-[I 17:24:33.752 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
-[I 17:24:46.727 NotebookApp] 302 GET / (192.168.0.80) 1.24ms
-[I 17:24:46.751 NotebookApp] 302 GET /tree? (192.168.0.80) 1.22ms
-[I 17:24:49.515 NotebookApp] 302 POST /login?next=%2Ftree%3F (192.168.0.80) 2.37ms
-[I 17:24:54.498 NotebookApp] Kernel started: e1490d8d-9ff8-4f85-ac5b-96d89e614ba0
-[W 17:24:54.595 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20201023172433 (192.168.0.80) 8.14ms referer=http://192.168.0.8:8301/notebooks/Untitled.ipynb
-[I 17:24:54.983 NotebookApp] Adapting to protocol v5.1 for kernel e1490d8d-9ff8-4f85-ac5b-96d89e614ba0
-[I 17:26:54.518 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:28:54.515 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:32:54.560 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:34:54.547 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:38:54.499 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:40:54.505 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:44:13.984 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[W 17:44:33.117 NotebookApp] Notebook Genetic Algorithms.ipynb is not trusted
-[W 17:44:33.191 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20201023172433 (192.168.0.80) 2.88ms referer=http://192.168.0.8:8301/notebooks/Genetic%20Algorithms.ipynb
-[I 17:44:33.946 NotebookApp] Kernel started: 67de2cc1-622e-454c-91ea-7d78f587057c
-[I 17:44:34.403 NotebookApp] Adapting to protocol v5.1 for kernel 67de2cc1-622e-454c-91ea-7d78f587057c
-[I 17:44:55.069 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:45:22.085 NotebookApp] Starting buffering for 67de2cc1-622e-454c-91ea-7d78f587057c:31679af41c6948e8ac197ebc936eef1d
-[I 17:46:55.053 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:48:55.064 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:50:55.061 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:52:55.055 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 17:54:55.070 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 18:00:55.063 NotebookApp] Saving file at /Visualization Genetic Algorithms.ipynb
-[I 18:48:10.661 NotebookApp] Starting buffering for e1490d8d-9ff8-4f85-ac5b-96d89e614ba0:3440a504a3034e1a8d2e1637fa6651b1
+[I 18:56:55.361 NotebookApp] [jupyter_nbextensions_configurator] enabled 0.4.1
+[I 18:56:55.361 NotebookApp] Serving notebooks from local directory: /home/orin/Learning/Notebook
+[I 18:56:55.361 NotebookApp] The Jupyter Notebook is running at:
+[I 18:56:55.361 NotebookApp] http://192.168.0.8:8301/
+[I 18:56:55.361 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[W 18:56:55.865 NotebookApp] 404 GET /api/kernels/713f6604-3bfa-499e-bf5e-46655ff3cda0/channels?session_id=961faa0c96954158aa8426797b782300 (192.168.0.80): Kernel does not exist: 713f6604-3bfa-499e-bf5e-46655ff3cda0
+[W 18:56:55.890 NotebookApp] 404 GET /api/kernels/713f6604-3bfa-499e-bf5e-46655ff3cda0/channels?session_id=961faa0c96954158aa8426797b782300 (192.168.0.80) 32.48ms referer=None
+[W 18:57:04.743 NotebookApp] Replacing stale connection: 713f6604-3bfa-499e-bf5e-46655ff3cda0:961faa0c96954158aa8426797b782300
+[W 18:57:09.701 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20201026185655 (192.168.0.80) 3.43ms referer=http://192.168.0.8:8301/notebooks/Genetic%20Visualization.ipynb
+[I 18:57:10.202 NotebookApp] Kernel started: 1ed808bb-7112-44fa-8bdd-3e62a55499a6
+[I 18:57:10.656 NotebookApp] Adapting to protocol v5.1 for kernel 1ed808bb-7112-44fa-8bdd-3e62a55499a6
+[I 19:07:11.188 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 19:49:11.288 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 20:07:11.278 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 20:09:11.522 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 20:33:11.122 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 20:35:11.112 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 20:37:11.108 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 20:39:11.126 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 20:49:11.119 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 21:11:11.073 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 21:13:11.107 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 21:15:11.024 NotebookApp] Saving file at /Genetic Visualization.ipynb
+[I 21:41:11.057 NotebookApp] Saving file at /Genetic Visualization.ipynb

@@ -370,7 +370,7 @@ class Tao_Multi:
             "age": [0] * 4
         }
         self.trans = [0] * island
-        self.tp = [0.1] * island
+        self.tp = [tp] * island
         self.varCross = [False] * island
         self.diff = {
             True: self.uniformCross,
@@ -475,7 +475,9 @@ class Tao_Multi:
             if random.random() < 0.5:
                 m += 1
                 self.fitness[i] = minFit
-        print("!!! Winter Comming to Island %d: %d Best Individuals are Destroied !! Mutation ReLoaded." % (island, m))
+        print('\033[5;37m', end='')
+        print("!!! Winter Comming to Island %d: %d Best Individuals are Destroied !! Mutation ReLoaded." % (island, m), end='')
+        print('\033[0m')
         self.mutation_probability[island] = self.stable_p["mp"][island]
 
     def select(self, island):
@@ -533,15 +535,18 @@ class Tao_Multi:
             self.elitists["chromosome"][island].extend(self.individuals[bestIndividual[0]])
             self.elitists["fitness"][island] = self.fitness[bestIndividual[0]]
             self.tp[island] = self.stable_p["tp"]
+            self.mutation_probability[island] = self.stable_p["mp"][island]
+            print('\033[1;33m', end='')
             print(
                 "$$$ Island %d Better Individual Found: age %d, fit %.2f, mutation %.2f." % (
                     island, age, self.elitists["fitness"][island], self.mutation_probability[island]
+                    ), end=''
                     )
-                    )
+            print('\033[0m')
         else:
             # 如果达到设定的self.happyGen代不能产生新精英，则判断进入局部最优，摧毁%10的最优个体
             if age - self.elitists["age"][island] > self.happyGen:
-                self.destroy(s=int(ethnicScale * 0.10), e=ethnicScale)
+                self.destroy(s=int(ethnicScale * 0.10), e=ethnicScale, island=island)
                 self.elitists["age"][island] = age - (self.happyGen - self.stableGen)
                 self.trans[island] = [n for n, v in sorted(enumerate(self.elitists["fitness"]), key=lambda x: x[1]) if n != island][0]
             elif age - self.elitists["age"][island] > self.stableGen:
@@ -549,13 +554,15 @@ class Tao_Multi:
                 # 需要在后续慢慢下降到设定的值
                 if random.random() < (age-self.elitists["age"][island])/(self.happyGen-self.stableGen):
                     # 步数有问题时，很难稳定，所以暂停变异率增加
-                    # self.mutation_probability[island] += 0.05
+                    self.mutation_probability[island] += 0.05
                     self.tp[island] += 0.05
+                    print('\033[1;31m', end='')
                     print(
                         "!!! Island %d Mutation Warning: %d gen no better individuals, up to %.2f, trans %.2f" %
                         (
                             island, age-self.elitists["age"][island], self.mutation_probability[island], self.tp[island]
-                        ))
+                        ), end='')
+                    print('\033[0m')
             else:
                 # self.mutation_probability[island] -= 0.1
                 if self.mutation_probability[island] < self.stable_p["mp"][island]:
@@ -683,7 +690,7 @@ if __name__ == "__main__":
 # n.logPIPE.close()
 # n.saveEli()
 
-m = Tao_Multi(gen_max=1500, diff=True)
+m = Tao_Multi(gen_max=3000, diff=True)
 
 
 def disUtil_Multi(obj, n, idv, sMX):
