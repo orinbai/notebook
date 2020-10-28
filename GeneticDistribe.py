@@ -334,10 +334,13 @@ class Tao_Uni:
 
 
 class Tao_Multi:
-    def __init__(self, size=200, chrom_size=243, cp=0.9, mp=0.4, tp=0.1, gen_max=1000, island=4, diff=False):
+    def __init__(self, size=200, chrom_size=243, cp=0.9, mp=0.4, tp=0.1, gen_max=1000, island=4, diff=False, dp=0.5):
         self.size = size  # 群体中的个体个数
+        self.destroy_probability = dp
         self.crossover_probability = cp  # 个体间染色体交叉概率
+        self.maxMP = mp
         initMP = self.randomMP(island, mp)
+        print("Init Mutation Probability:", initMP)
         self.stable_p = {"mp": initMP[:], "tp": tp}
         # 因为算法中变异率是动态变化的，所以需要给每个island设定变异率
         if island > 0:
@@ -371,15 +374,17 @@ class Tao_Multi:
         }
         self.trans = [0] * island
         self.tp = [tp] * island
+        # 不同交叉规则的开关
         self.varCross = [False] * island
+        self.afterDestory = [False] * island
         self.diff = {
-            True: self.uniformCross,
-            False: self.cross
+            1: self.uniformCross,
+            0: self.cross
         }
         if diff:
             # 默认选择一半岛用更多样的交叉规则
-            self.varCross[0] = True
-            self.varCross[2] = True
+            self.varCross[0] = 1
+            self.varCross[2] = 1
 
         self.initVar()
         self.forBorn(island)
@@ -472,13 +477,16 @@ class Tao_Multi:
             n for n, val in sorted(list(enumerate(self.fitness))[ethnic_s: ethnic_e], key=lambda x: x[1])
             ][s:e]
         for i in weakness:
-            if random.random() < 0.5:
+            if random.random() < self.destroy_probability:
                 m += 1
                 self.fitness[i] = minFit
         print('\033[5;37m', end='')
         print("!!! Winter Comming to Island %d: %d Best Individuals are Destroied !! Mutation ReLoaded." % (island, m), end='')
         print('\033[0m')
+        # 让被destroy的island自主发展一段时间
         self.mutation_probability[island] = self.stable_p["mp"][island]
+        self.tp[island] = self.stable_p["tp"]
+        self.afterDestory[island] = True
 
     def select(self, island):
         ethnic_s, ethnic_e = self.island[island]
@@ -568,8 +576,14 @@ class Tao_Multi:
                 if self.mutation_probability[island] < self.stable_p["mp"][island]:
                     self.mutation_probability[island] = self.stable_p["mp"][island]
 
-        if self.mutation_probability[island] > 1:
-            self.mutation_probability[island] = 1
+        if self.mutation_probability[island] > self.maxMP/2+0.5:
+            # 变异率提升到 1 虽然可以提高突破局部最优的可能，但是
+            # 并不利于稳定性状的保持。所以将变异率的最大值锁定在
+            # 预设变异率，这样预设变异率其实就成为了最大变异率了。
+            # (1 - self.maxMP)/2 + self.maxMP
+            self.mutation_probability[island] = self.maxMP/2+0.5
+        # if self.mutation_probability[island] > 1:
+        #     self.mutation_probability[island] = 1
 
     def islandTrans(self, age, island):
         # 按照1->2->3->4->1，所以定一个island长度的列表
@@ -588,6 +602,11 @@ class Tao_Multi:
 
     def simAnneal(self, age):
         return 0.5*(0.8**int(age/100))
+
+    # def elitistFunc(self, i, island):
+    #     if self.afterDestory[island]:
+    #         for m in range(len(self.tp)):
+    #         self.new_individuals[i] = self.elitists["chromosome"][island][:]
 
     def evolve(self, age, island):
         ethnic_s, ethnic_e = self.island[island]
@@ -690,7 +709,7 @@ if __name__ == "__main__":
 # n.logPIPE.close()
 # n.saveEli()
 
-m = Tao_Multi(gen_max=3000, diff=True)
+m = Tao_Multi(gen_max=3000, diff=True, dp=0.8, tp=0.05)
 
 
 def disUtil_Multi(obj, n, idv, sMX):
