@@ -348,6 +348,8 @@ class Tao_Multi:
         else:
             self.mutation_probability = mp
         self.generation_max = gen_max
+        self.dukeTown = random.randint(0, island-1)
+        print("Saddly, island %d is chosen" % self.dukeTown)
         self.actions = 7
         self.sample_size = chrom_size
         self.strategyMX = {}
@@ -470,6 +472,7 @@ class Tao_Multi:
                 self.selector_probability[i] += self.selector_probability[i-1]
 
     def destroy(self, s=0, e=10, island=0):
+        island = self.dukeTown
         ethnic_s, ethnic_e = self.island[island]
         minFit = min(self.fitness[ethnic_s:ethnic_e])
         m = 0
@@ -678,66 +681,65 @@ class Tao_Multi:
 
 
 if __name__ == "__main__":
-    n = Tao_Uni(gen_max=1800)
+    # 单线程版
+    # n = Tao_Uni(gen_max=1800)
 
-    def disUtil(obj, n, idv, sMX):
-        print(n, idv, sMX)
-        return obj.aLive(n, idv, sMX)
+    # def disUtil(obj, n, idv, sMX):
+    #     print(n, idv, sMX)
+    #     return obj.aLive(n, idv, sMX)
 
-    def disGeneration(map_size=12, max_step=200, g_loop=200, chrom_size=243):
-        cluster = dispy.JobCluster(
-            disUtil,
-            depends=[Creature],
-            nodes=["*"],
-            secret='Z1207'
-            )
-        for i in range(n.generation_max):
-            jobs = []
-            for no, individual in enumerate(n.individuals):
-                c = Creature(map_size, max_step, g_loop, chrom_size)
-                job = cluster.submit(c, no, individual, n.strategyMX)
-                jobs.append(job)
+    # def disGeneration(map_size=12, max_step=200, g_loop=200, chrom_size=243):
+    #     cluster = dispy.JobCluster(
+    #         disUtil,
+    #         depends=[Creature],
+    #         nodes=["*"],
+    #         secret='Z1207'
+    #         )
+    #     for i in range(n.generation_max):
+    #         jobs = []
+    #         for no, individual in enumerate(n.individuals):
+    #             c = Creature(map_size, max_step, g_loop, chrom_size)
+    #             job = cluster.submit(c, no, individual, n.strategyMX)
+    #             jobs.append(job)
 
-            for job in jobs:
-                idx, score = job()
-                n.fitness[idx] = score
-            n.fitness_func(i)
+    #         for job in jobs:
+    #             idx, score = job()
+    #             n.fitness[idx] = score
+    #         n.fitness_func(i)
+    ####################################
 
+    # 经典遗传算法并行后的测试
+    # disGeneration(g_loop=400)
+    # n.logPIPE.close()
+    # n.saveEli()
 
-# 经典遗传算法并行后的测试
-# disGeneration(g_loop=400)
-# n.logPIPE.close()
-# n.saveEli()
+    # 多机分布版本
+    m = Tao_Multi(gen_max=1200, diff=True, dp=0.8, tp=0.05)
 
-m = Tao_Multi(gen_max=3000, diff=True, dp=0.8, tp=0.05)
+    def disUtil_Multi(obj, n, idv, sMX):
+            return obj.aLive(n, idv, sMX)
 
+    def disGeneration_Multi(map_size=12, max_step=200, g_loop=200, chrom_size=243, island=4):
+            cluster = dispy.JobCluster(
+                disUtil_Multi,
+                depends=[Creature],
+                nodes=["*"],
+                secret='Z1207'
+                )
+            for i in range(m.generation_max):
+                jobs = []
+                for no, individual in enumerate(m.individuals):
+                    c = Creature(map_size, max_step, g_loop, chrom_size)
+                    job = cluster.submit(c, no, individual, m.strategyMX)
+                    jobs.append(job)
 
-def disUtil_Multi(obj, n, idv, sMX):
-        return obj.aLive(n, idv, sMX)
+                for job in jobs:
+                    idx, score = job()
+                    m.fitness[idx] = score
+                m.fitness_func(i)
+                if max(m.fitness) > (map_size-2)*(map_size-2)*10/2-10:
+                    break
 
-
-def disGeneration_Multi(map_size=12, max_step=200, g_loop=200, chrom_size=243, island=4):
-        cluster = dispy.JobCluster(
-            disUtil_Multi,
-            depends=[Creature],
-            nodes=["*"],
-            secret='Z1207'
-            )
-        for i in range(m.generation_max):
-            jobs = []
-            for no, individual in enumerate(m.individuals):
-                c = Creature(map_size, max_step, g_loop, chrom_size)
-                job = cluster.submit(c, no, individual, m.strategyMX)
-                jobs.append(job)
-
-            for job in jobs:
-                idx, score = job()
-                m.fitness[idx] = score
-            m.fitness_func(i)
-            if max(m.fitness) > (map_size-2)*(map_size-2)*10/2-10:
-                break
-
-
-disGeneration_Multi(g_loop=500)
-m.logPIPE.close()
-m.saveEli()
+    disGeneration_Multi(g_loop=500)
+    m.logPIPE.close()
+    m.saveEli()
