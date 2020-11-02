@@ -51,3 +51,4 @@
 [I 21:43:12.272 NotebookApp] Saving file at /Genetic Visualization.ipynb
 [I 21:45:12.236 NotebookApp] Saving file at /Genetic Visualization.ipynb
 [I 21:49:33.041 NotebookApp] Starting buffering for 1ed808bb-7112-44fa-8bdd-3e62a55499a6:0d234b004ff24148b53965250d609a66
+[IPKernelApp] WARNING | Parent appears to have exited, shutting down.
