@@ -668,7 +668,8 @@ class Tao_Multi:
     def saveEli(self):
         path = "/home/orin/Learning/Notebook"
         with open("%s/result/%d.mi.res" % (path, int(time.time())), 'w') as f:
-            f.write("%s\t%s\n" % (self.timeSTR, json.dumps(self.elitists)))
+            f.write("Cons\t%s\t%s\n" % (self.dukeTown, json.dumps(self.stable_p)))
+            f.write("Res\t%s\t%s\n" % (self.timeSTR, json.dumps(self.elitists)))
 
     def statSimple(self, fName):
         res = []
@@ -714,7 +715,7 @@ if __name__ == "__main__":
     # n.saveEli()
 
     # 多机分布版本
-    m = Tao_Multi(gen_max=1200, diff=True, dp=0.8, tp=0.05)
+    m = Tao_Multi(gen_max=3000, diff=True, dp=0.8, tp=0.05)
 
     def disUtil_Multi(obj, n, idv, sMX):
             return obj.aLive(n, idv, sMX)
