@@ -1,0 +1,46 @@
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-1.4.0.min.js"></script>
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.4.0.min.js"></script>
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-tables-1.4.0.min.js"></script>
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-gl-1.4.0.min.js"></script>
+
+
+
+<div class="bk-root" id="f84c3ff2-3d54-460e-8ff0-e88a688f4379" data-root-id="53363"></div>
+
+
+<script type="text/javascript">
+    (function() {
+          var fn = function() {
+            Bokeh.safely(function() {
+              (function(root) {
+                function embed_document(root) {
+                  
+                var docs_json = '{"ee574682-b44d-4d73-8b7e-7d4f7d4a8f12":{"roots":{"references":[{"attributes":{"children":[{"id":"53362","type":"ToolbarBox"},{"id":"53360","type":"GridBox"}]},"id":"53363","type":"Column"},{"attributes":{},"id":"53361","type":"ProxyToolbar"},{"attributes":{},"id":"53360","type":"GridBox"},{"attributes":{"toolbar":{"id":"53361","type":"ProxyToolbar"},"toolbar_location":"above"},"id":"53362","type":"ToolbarBox"}],"root_ids":["53363"]},"title":"Bokeh Application","version":"1.4.0"}}';
+                var render_items = [{"docid":"ee574682-b44d-4d73-8b7e-7d4f7d4a8f12","roots":{"53363":"f84c3ff2-3d54-460e-8ff0-e88a688f4379"}}];
+                root.Bokeh.embed.embed_items(docs_json, render_items);
+              
+                }
+                if (root.Bokeh !== undefined) {
+                  embed_document(root);
+                } else {
+                  var attempts = 0;
+                  var timer = setInterval(function(root) {
+                    if (root.Bokeh !== undefined) {
+                      clearInterval(timer);
+                      embed_document(root);
+                    } else {
+                      attempts++;
+                      if (attempts > 100) {
+                        clearInterval(timer);
+                        console.log("Bokeh: ERROR: Unable to run BokehJS code because BokehJS library is missing");
+                      }
+                    }
+                  }, 10, root)
+                }
+              })(window);
+            });
+          };
+          if (document.readyState != "loading") fn();
+          else document.addEventListener("DOMContentLoaded", fn);
+        })();
+</script>
