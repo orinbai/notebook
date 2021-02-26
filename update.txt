@@ -1,0 +1,69 @@
+Sub updateSMTart()
+    Dim sht As Worksheet
+    Dim rng1 As Range
+    Dim LastRow As Long
+    Dim mAddress As String
+    Dim outline As String
+    Dim mText As String
+    Dim rArr()
+    
+
+    ' E列不要为空状态完整比较好, 同时从第一行开始
+    ' 目前获得LastRow后，则整体范围是B1:G LastRow
+    ' 注意：
+    '   1. 表头占两行，要跳过表头只需FirstRow + 2
+    '   2. 总监、部门主管 作为部门的下级，而作为其他的上级
+    ' FirstRow = Sheets("通讯录").[B1].End(xlDown).Row
+    FirstCol = Sheets("通讯录").[A1].End(xlToRight).Column
+    FirstRow = 1
+    LastRow = Sheets("通讯录").[E65535].End(xlUp).Row
+    LastCol = Sheets("通讯录").[IV1].End(xlToLeft).Column
+    Debug.Print LastRow & " " & LastCol & " " & FirstRow & " " & FirstCol
+    Set rng1 = Range("B1", "G" & LastRow)
+    rng1.Select
+    Set aa = Application.Intersect(Range("B3"), Range("$B$5:$B$25"))
+    If aa Is Nothing Then
+        Debug.Print "Wrong"
+    Else
+        Debug.Print "OK"
+    End If
+    
+
+    tbnum_globle = 0
+    For i = FirstRow + 2 To LastRow
+        outline = ""
+        For j = FirstCol To LastCol
+            ' 判断是否是一个合并过的单元格
+            '   如果是合并的单元格，且当前单元格有值，则该值是该区域的值
+            '   反之，改单元格所在行就是当前合并单元格的子信息
+            ' If Range(Cells(i, j).Address).MergeCells Then
+            '     mAddress = Range(Cells(i, j).Address).MergeArea.Address
+            '     Range(mAddress).Select
+            '     mText = Cells(i, j)
+            '     Debug.Print "Row: " & i & " 范围: " & Range(Cells(i, j).Address).MergeArea.Address
+            '     Debug.Print Cells(i, j).Value
+                'MsgBox (Range("B" & i).MergeArea.Address)
+            ' End If
+            Debug.Print i & ":" & i, j
+            Range(Cells(i, j).Address, Cells(i, LastCol).Address).Select
+            ' 顶部需要是SmartArt的顶点内容，所以单独处理
+            If InStr(1, Cells(i, j), "总监") > 0 Then
+                Debug.Print "|" & Chr(10) & "|"
+                tbnum_global = tbnum_global + 1
+            End If
+            If Range(Cells(i, j).Address).MergeCells Then
+                If IsEmpty(Cells(i, j)) Then
+                    Debug.Print "这是个子级"
+                Else
+                    Debug.Print "这是当前的第一级"
+                End If
+            End If
+            
+        Next
+    Next
+    'Debug.Print Application.Intersect(Range("B5"), Range("$B$5:$B$25"))
+    MsgBox (LastRow)
+    
+End Sub
+
+
