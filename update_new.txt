@@ -1,0 +1,87 @@
+Sub drawOrg()
+'
+' org Macro
+' Macro to generate organization chart
+'
+' Keyboard Shortcut: Ctrl+j
+'
+    Dim ogSALayout As SmartArtLayout
+    Dim QNode As SmartArtNode
+    Dim QNodes As SmartArtNodes
+    Dim t As Integer
+    Set ogSALayout = Application.SmartArtLayouts(92) 'reference to organization chart
+    Set ogshp = ActiveWorkbook.ActiveSheet.Shapes.AddSmartArt(ogSALayout)
+    Set QNodes = ogshp.SmartArt.AllNodes
+    t = QNodes.Count
+    
+    Debug.Print ogshp.Height, ogshp.Width
+    ogshp.Height = 900
+    ogshp.Width = 800
+  
+    While QNodes.Count < t
+    QNodes(QNodes.Count).Delete
+    Wend
+  
+    While QNodes.Count < Range("A2").End(xlDown).Row
+    QNodes.Add.Promote
+    Wend
+  
+    For i = 1 + 1 To Range("A1").End(xlDown).Row
+    'Promote and demote nodes to put them at the proper level.
+
+    While QNodes(Range("A" & i)).Level < Range("D" & i).Value
+        QNodes(Range("A" & i)).Demote
+    Wend
+ 
+    'Copy the cell text to the node.
+    QNodes(Range("A" & i)).TextFrame2.TextRange.Text = Range("E" & i)
+    Next i
+End Sub
+
+Sub reFormat()
+    Dim sh1, sh2 As Worksheet
+    Dim Lvl(1 To 3) As Integer
+    Dim startRow, lastRow, startCol, lastCol As Integer
+    Set sh2 = ActiveWorkbook.Sheets("组织格式")
+    Set sh1 = ActiveWorkbook.Sheets("通讯录")
+    Lvl(1) = 1
+    Lvl(2) = 2
+    Lvl(3) = 3
+    
+    ' 圈定通讯录范围
+    startRow = 1
+    startCol = sh1.Range("A1").End(xlToRight).Column
+    lastRow = sh1.Range("D3").End(xlDown).Row
+    lastCol = sh1.Range("T1").End(xlToLeft).Column
+    
+    ' 给格式添加表头
+    sh2.Range("A1").Value = "No."
+    sh2.Range("B1").Value = "名称"
+    sh2.Range("C1").Value = "层级"
+    
+    
+    ' Debug.Print startRow, lastRow, startCol, lastCol
+    ' 总监特殊，先处理了总监
+    ' 总监这个title
+    sh2.Range("A2").Value = Lvl(1)
+    sh2.Range("B2").Value = sh1.Range("A3").Value
+    sh2.Range("C2").Value = Lvl(1)
+    ' 中方外方的合并
+    Lvl(1) = Lvl(1) + 1
+    Lvl(2) = Lvl(2) + 1
+    Lvl(3) = Lvl(3) + 1
+    sh2.Range("A3").Value = Lvl(1)
+    sh2.Range("B3").Value = sh1.Range("C3").Value & Space(1) & sh1.Range("F3").Value & Chr(10) & sh1.Range("C4").Value & Space(1) & sh1.Range("F4").Value
+    sh2.Range("C3").Value = Lvl(1)
+    
+    ' 处理员工
+    For i = 5 To lastRow
+        For j = startCol To lastCol
+            Debug.Print i, j
+
+        Next j
+    Next i
+        
+    
+End Sub
+
