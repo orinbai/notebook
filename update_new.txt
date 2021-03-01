@@ -29,59 +29,84 @@ Sub drawOrg()
     For i = 1 + 1 To Range("A1").End(xlDown).Row
     'Promote and demote nodes to put them at the proper level.
 
-    While QNodes(Range("A" & i)).Level < Range("D" & i).Value
+    While QNodes(Range("A" & i)).Level < Range("C" & i).Value
         QNodes(Range("A" & i)).Demote
     Wend
  
     'Copy the cell text to the node.
-    QNodes(Range("A" & i)).TextFrame2.TextRange.Text = Range("E" & i)
+    QNodes(Range("A" & i)).TextFrame2.TextRange.Text = Range("B" & i)
     Next i
 End Sub
 
 Sub reFormat()
     Dim sh1, sh2 As Worksheet
     Dim Lvl(1 To 3) As Integer
-    Dim startRow, lastRow, startCol, lastCol As Integer
-    Set sh2 = ActiveWorkbook.Sheets("ç»„ç»‡æ ¼å¼")
-    Set sh1 = ActiveWorkbook.Sheets("é€šè®¯å½•")
+    Dim startRow, lastRow, startCol, lastCol, lineNum As Integer
+    Set sh2 = ActiveWorkbook.Sheets("×éÖ¯¸ñÊ½")
+    Set sh1 = ActiveWorkbook.Sheets("Í¨Ñ¶Â¼")
     Lvl(1) = 1
     Lvl(2) = 2
     Lvl(3) = 3
     
-    ' åœˆå®šé€šè®¯å½•èŒƒå›´
+    ' È¦¶¨Í¨Ñ¶Â¼·¶Î§
     startRow = 1
-    startCol = sh1.Range("A1").End(xlToRight).Column
+    startCol = 1
     lastRow = sh1.Range("D3").End(xlDown).Row
     lastCol = sh1.Range("T1").End(xlToLeft).Column
     
-    ' ç»™æ ¼å¼æ·»åŠ è¡¨å¤´
+    ' ¸ø¸ñÊ½Ìí¼Ó±íÍ·
     sh2.Range("A1").Value = "No."
-    sh2.Range("B1").Value = "åç§°"
-    sh2.Range("C1").Value = "å±‚çº§"
+    sh2.Range("B1").Value = "Ãû³Æ"
+    sh2.Range("C1").Value = "²ã¼¶"
     
     
     ' Debug.Print startRow, lastRow, startCol, lastCol
-    ' æ€»ç›‘ç‰¹æ®Šï¼Œå…ˆå¤„ç†äº†æ€»ç›‘
-    ' æ€»ç›‘è¿™ä¸ªtitle
+    ' ×Ü¼àÌØÊâ£¬ÏÈ´¦ÀíÁË×Ü¼à
+    ' ×Ü¼àÕâ¸ötitle
     sh2.Range("A2").Value = Lvl(1)
     sh2.Range("B2").Value = sh1.Range("A3").Value
     sh2.Range("C2").Value = Lvl(1)
-    ' ä¸­æ–¹å¤–æ–¹çš„åˆå¹¶
+    ' ÖÐ·½Íâ·½µÄºÏ²¢
     Lvl(1) = Lvl(1) + 1
     Lvl(2) = Lvl(2) + 1
     Lvl(3) = Lvl(3) + 1
     sh2.Range("A3").Value = Lvl(1)
     sh2.Range("B3").Value = sh1.Range("C3").Value & Space(1) & sh1.Range("F3").Value & Chr(10) & sh1.Range("C4").Value & Space(1) & sh1.Range("F4").Value
     sh2.Range("C3").Value = Lvl(1)
+    Lvl(1) = Lvl(1) + 1
+    Lvl(2) = Lvl(2) + 1
+    Lvl(3) = Lvl(3) + 1
+    lineNum = 3
     
-    ' å¤„ç†å‘˜å·¥
+    ' ´¦ÀíÔ±¹¤
     For i = 5 To lastRow
-        For j = startCol To lastCol
-            Debug.Print i, j
-
+        For j = 1 To 3
+            Cells(i, j).Select
+            If Range(Cells(i, j).Address).MergeCells Then
+                If Cells(i, j).Value <> "" Then
+                    If Not IsEmpty(sh1.Range("E" & i).Value) And InStr("¾­Àí|Ö÷ÈÎ|Ö÷¹Ü", sh1.Range("E" & i).Value) Then
+                        lineNum = lineNum + 1
+                        sh2.Range("A" & lineNum).Value = i - 2
+                        sh2.Range("B" & lineNum).Value = sh1.Range("A" & i).Value & Chr(10) & sh1.Range("C" & i).Value & Space(1) & sh1.Range("E" & i).Value
+                        sh2.Range("C" & lineNum).Value = Lvl(j)
+                        Exit For
+                    Else
+                        lineNum = lineNum + 1
+                        sh2.Range("A" & lineNum).Value = i - 2
+                        sh2.Range("B" & lineNum).Value = sh1.Range(Cells(i, j).Address).Value
+                        sh2.Range("C" & lineNum).Value = Lvl(j)
+                    End If
+                End If
+            Else
+                lineNum = lineNum + 1
+                sh2.Range("A" & lineNum).Value = i - 2
+                sh2.Range("B" & lineNum).Value = sh1.Range(Cells(i, j).Address).Value & Chr(10) & sh1.Range("D" & i)
+                sh2.Range("C" & lineNum).Value = Lvl(j)
+            End If
         Next j
     Next i
         
     
 End Sub
+
 
