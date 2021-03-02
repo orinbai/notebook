@@ -1,0 +1,196 @@
+Sub drawOrg()
+'
+' org Macro
+' Macro to generate organization chart
+'
+' Keyboard Shortcut: Ctrl+j
+'
+    Dim ogSALayout As SmartArtLayout
+    Dim sht1, sht2 As Worksheet
+    Dim QNode As SmartArtNode
+    Dim QNodes As SmartArtNodes
+    Dim t As Integer
+    Set sht1 = ActiveWorkbook.Sheets("通讯录")
+    Set sht2 = ActiveWorkbook.Sheets("组织格式")
+    Set ogSALayout = Application.SmartArtLayouts(88) 'reference to organization chart
+    'Set ogshp = ActiveWorkbook.ActiveSheet.Shapes.AddSmartArt(ogSALayout)
+    Set ogshp = sht1.Shapes.AddSmartArt(ogSALayout)
+    
+    Set QNodes = ogshp.SmartArt.AllNodes
+    t = QNodes.Count
+    
+    Debug.Print ogshp.Height, ogshp.Width
+    ogshp.Height = 450
+    ogshp.Width = 600
+    ogshp.Top = 50
+    ogshp.Left = 400
+  
+    While QNodes.Count < t
+        QNodes(QNodes.Count).Delete
+    Wend
+    QNodes(2).Delete
+  
+    While QNodes.Count < sht2.Range("A1").End(xlDown).Row - 1
+        Debug.Print QNodes.Count
+        QNodes.Add.Promote
+    Wend
+    'Debug.Print QNodes(sht2.Range("A2")).Level
+    'Exit Sub
+  
+    For i = 1 + 1 To sht2.Range("A1").End(xlDown).Row
+    'Promote and demote nodes to put them at the proper level.
+        While QNodes(sht2.Range("A" & i)).Level < sht2.Range("C" & i).Value
+            QNodes(sht2.Range("A" & i)).Demote
+        Wend
+ 
+    'Copy the cell text to the node.
+        QNodes(sht2.Range("A" & i)).TextFrame2.TextRange.Text = sht2.Range("B" & i)
+        dcolor = QNodes(sht2.Range("A" & i)).TextFrame2.TextRange.Font.Fill.ForeColor.RGB
+        If sht2.Range("D" & i).Value > 0 Then
+            QNodes(sht2.Range("A" & i)).TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(255, 0, 0)
+        'Else
+        '    QNodes(sht2.Range("A" & i)).TextFrame2.TextRange.Font.Fill.ForeColor.RGB = dcolor
+        End If
+    Next i
+    QNodes(sht2.Range("A" & sht2.Range("A1").End(xlDown).Row)).Promote
+End Sub
+
+Sub reFormat()
+    Dim sh1, sh2 As Worksheet
+    Dim Lvl(1 To 3) As Integer
+    Dim lR2, startRow, lastRow, startCol, lastCol, lineNum As Integer
+    Set sh2 = ActiveWorkbook.Sheets("组织格式")
+    Set sh1 = ActiveWorkbook.Sheets("通讯录")
+    Lvl(1) = 1
+    Lvl(2) = 2
+    Lvl(3) = 3
+    ' 清空 组织格式 所在的sheet
+    lR2 = sh2.Range("A1").End(xlDown).Row
+    ' 组织格式 sheet 总共是ABCD四列
+    sh2.Range("A1:D" & lR2).Clear
+    
+    ' 圈定通讯录范围
+    startRow = 1
+    startCol = 1
+    lastRow = sh1.Range("D3").End(xlDown).Row
+    lastCol = sh1.Range("T1").End(xlToLeft).Column
+    
+    ' 给格式添加表头
+    sh2.Range("A1").Value = "No."
+    sh2.Range("B1").Value = "名称"
+    sh2.Range("C1").Value = "层级"
+    sh2.Range("D1").Value = "图例"
+    
+    
+    ' Debug.Print startRow, lastRow, startCol, lastCol
+    ' 总监特殊，先处理了总监
+    ' 总监这个title
+    sh2.Range("A2").Value = Lvl(1)
+    sh2.Range("B2").Value = sh1.Range("A3").Value
+    sh2.Range("C2").Value = Lvl(1)
+    ' 中方外方的合并
+    Lvl(1) = Lvl(1) + 1
+    Lvl(2) = Lvl(2) + 1
+    Lvl(3) = Lvl(3) + 1
+    sh2.Range("A3").Value = Lvl(1)
+    sh2.Range("B3").Value = sh1.Range("C3").Value & Space(1) & sh1.Range("F3").Value & Chr(10) & sh1.Range("C4").Value & Space(1) & sh1.Range("F4").Value
+    sh2.Range("C3").Value = Lvl(1)
+    Lvl(1) = Lvl(1) + 1
+    Lvl(2) = Lvl(2) + 1
+    Lvl(3) = Lvl(3) + 1
+    lineNum = 3
+    
+    ' 处理员工
+    For i = 5 To lastRow
+        For j = 1 To 3
+            Cells(i, j).Select
+            If Range(Cells(i, j).Address).MergeCells Then
+                If Cells(i, j).Value <> "" Then
+                    If Not IsEmpty(sh1.Range("E" & i).Value) And InStr("经理|主任|主管", sh1.Range("E" & i).Value) Then
+                        lineNum = lineNum + 1
+                        sh2.Range("A" & lineNum).Value = lineNum - 1
+                        sh2.Range("B" & lineNum).Value = sh1.Cells(i, j).Value & Chr(10) & sh1.Range("C" & i).Value & Space(1) & sh1.Range("E" & i).Value
+                        sh2.Range("C" & lineNum).Value = Lvl(j)
+                        Exit For
+                    Else
+                        lineNum = lineNum + 1
+                        sh2.Range("A" & lineNum).Value = lineNum - 1
+                        sh2.Range("B" & lineNum).Value = sh1.Range(Cells(i, j).Address).Value
+                        sh2.Range("C" & lineNum).Value = Lvl(j)
+                    End If
+                End If
+            Else
+                lineNum = lineNum + 1
+                sh2.Range("A" & lineNum).Value = lineNum - 1
+                sh2.Range("B" & lineNum).Value = sh1.Range(Cells(i, j).Address).Value & Chr(10) & sh1.Range("D" & i)
+                sh2.Range("C" & lineNum).Value = Lvl(j)
+            End If
+            If Cells(i, j).Value = "待补" Then
+                sh2.Range("D" & lineNum).Value = 1
+            End If
+        Next j
+    Next i
+    toHire = Application.WorksheetFunction.CountIf(sh1.Range("D3:D" & lastRow), "空岗")
+    lineNum = lineNum + 1
+    sh2.Range("A" & lineNum).Value = lineNum - 1
+    sh2.Range("B" & lineNum).Value = lastRow - 2 - toHire & "P" & Chr(32) & toHire & "NN"
+    sh2.Range("C" & lineNum).Value = 1
+    'sh2.Range("D" & lineNum).Value = 1
+    
+End Sub
+
+Sub toPPT()
+    Dim objPPT As Object
+    Dim objPrs As Object
+    Dim shpName As String
+    Dim pshp As Shape
+    'Application.ScreenUpdating = False
+    
+    Set objPPT = CreateObject("Powerpoint.application")
+    Set objPrs = objPPT.Presentations.Open(ThisWorkbook.Path & "\ppt.pptx", , , msoFalse)
+    'Set objPrs = objPPT.Presentations.Open(ThisWorkbook.Path & "\ppt.pptx")
+    Set s2 = objPrs.Slides(1)
+    
+    objPrs.Slides(3).Shapes("文本框 1").TextFrame.TextRange.Text = "aaaa"
+    
+    For Each pshp1 In objPrs.Slides(1).Shapes
+        Debug.Print pshp1.Name
+        If InStr(1, pshp1.Name, "Diagram", 0) Then
+            shpName = pshp1.Name
+        End If
+    Next pshp1
+    
+    
+        
+    For Each shp In ActiveSheet.Shapes
+        Debug.Print shp.Name
+        If InStr(1, shp.Name, "Diagram", 0) Then
+            Debug.Print shp.Height, shp.Width, shp.Top, shp.Left
+            Debug.Print "OK1"
+            shp.Copy
+        End If
+    Next shp
+    objPrs.Slides(1).Shapes.PasteSpecial ppPasteBitmap
+    If shpName <> "" Then
+        Set pshp = objPrs.Slides(1).Shapes(shpName)
+        nLeft = pshp.Left
+        nTop = pshp.Top
+        nHeight = pshp.Height
+        nWidth = pshp.Width
+        objPrs.Slides(1).Shapes.Paste
+        'Application.CutCopyMode = False
+        Set pshp1 = s2.Shapes(s2.Shapes.Count)
+        pshp1.Name = shpName
+        pshp1.Top = nTop
+        pshp1.Left = nLeft
+        pshp1.Height = nHeight
+        pshp1.Width = nWidth
+        pshp.Delete
+    Else
+        objPrs.Slides(1).Shapes.Paste
+        s2.Shapes.Paste
+    End If
+    'strSPname = ActiveSheet.Shapes(Application.Caller).Name
+    'MsgBox "选中的名称是：" & strSPname
+End Sub
+

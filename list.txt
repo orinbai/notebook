@@ -1,0 +1,8 @@
+https://stackoverflow.com/questions/7492519/paste-excel-chart-into-powerpoint-using-vba
+https://zhuanlan.zhihu.com/p/77181410
+
+http://club.excelhome.net/thread-1281336-1-1.html
+https://stackoverflow.com/questions/7492519/paste-excel-chart-into-powerpoint-using-vba
+https://www.goodly.co.in/copy-chart-from-excel-to-powerpoint-using-vba/
+https://blog.csdn.net/Maxxi_Huang/article/details/93378050
+https://stackoverflow.com/questions/16338295/excel-to-powerpoint-pastespecial-and-keep-source-formatting
