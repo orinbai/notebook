@@ -6,3 +6,10 @@ https://stackoverflow.com/questions/7492519/paste-excel-chart-into-powerpoint-us
 https://www.goodly.co.in/copy-chart-from-excel-to-powerpoint-using-vba/
 https://blog.csdn.net/Maxxi_Huang/article/details/93378050
 https://stackoverflow.com/questions/16338295/excel-to-powerpoint-pastespecial-and-keep-source-formatting
+
+https://techcommunity.microsoft.com/t5/excel/excel-charts-to-powerpoint-exporting-using-vba/m-p/310197
+https://stackoverflow.com/questions/7492519/paste-excel-chart-into-powerpoint-using-vba
+https://www.thesmallman.com/blog/2016/9/16/copy-and-paste-an-excel-chart-into-powerpoint-with-vba
+https://debugvba.com/copy-or-export-chart-from-excel-to-powerpoint-in-vba-excel-debugvba-com/
+https://debugvba.com/how-to-copy-multiple-charts-from-excel-to-different-powerpoint-slide-by-vba-excel/
+https://stackoverflow.com/questions/48785182/excel-vba-to-copy-slides-to-an-existing-powerpoint-presentation
