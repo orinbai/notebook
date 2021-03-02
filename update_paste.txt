@@ -1,0 +1,60 @@
+﻿Sub toPPT()
+    Dim objPPT As Object
+    Dim objPrs As Object
+    Dim shpName As String
+    Dim pshp As Shape
+    'Application.ScreenUpdating = False
+    
+    Set objPPT = CreateObject("PowerPoint.Application")
+    objPPT.Visible = msoTrue
+    'Set objPrs = objPPT.Presentations.Open(ThisWorkbook.Path & "\org.pptx", , , msoFalse)
+    Set objPrs = objPPT.Presentations.Open(ThisWorkbook.Path & "\org.pptx")
+    'Set s2 = objPrs.Slides(1)
+    
+    'objPrs.Slides(3).Shapes("文本框 1").TextFrame.TextRange.Text = "aaaa"
+    
+    For Each pshp1 In objPrs.Slides(1).Shapes
+        Debug.Print pshp1.Name
+        If InStr(1, pshp1.Name, "Diagram", 0) Then
+            shpName = pshp1.Name
+        End If
+    Next pshp1
+    
+    
+        
+    For Each shp In ActiveSheet.Shapes
+        Debug.Print shp.Name
+        If InStr(1, shp.Name, "Diagram", 0) Then
+            Debug.Print shp.Height, shp.Width, shp.Top, shp.Left
+            Debug.Print "OK1"
+            shp.Select
+            Application.CommandBars.ExecuteMso "Copy"
+            'sld = objPrs.Slides.Add(objPrs.Slides.Count + 1, 12)
+            objPPT.CommandBars.ExecuteMso "PasteExcelChartSourceFormatting"
+            
+            
+        End If
+    Next shp
+    'objPrs.Slides(1).Shapes.PasteSpecial ppPasteBitmap
+    If shpName <> "" Then
+        Set pshp = objPrs.Slides(1).Shapes(shpName)
+        nLeft = pshp.Left
+        nTop = pshp.Top
+        nHeight = pshp.Height
+        nWidth = pshp.Width
+        objPrs.Slides(1).Shapes.Paste
+        'Application.CutCopyMode = False
+        Set pshp1 = s2.Shapes(s2.Shapes.Count)
+        pshp1.Name = shpName
+        pshp1.Top = nTop
+        pshp1.Left = nLeft
+        pshp1.Height = nHeight
+        pshp1.Width = nWidth
+        pshp.Delete
+    Else
+        objPrs.Slides(1).Shapes.Paste
+        s2.Shapes.Paste
+    End If
+    'strSPname = ActiveSheet.Shapes(Application.Caller).Name
+    'MsgBox "选中的名称是：" & strSPname
+End Sub
